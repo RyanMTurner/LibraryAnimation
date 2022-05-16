@@ -59,7 +59,7 @@ public class Cube
     public Cube(Vector3Int position, bool last, Heading direction, List<GameObject> wallPrefabs) {
         Position = position;
         if (last) {
-            int newNumber = Random.Range(0, 6);
+            int newNumber = Random.Range(0, 5);
             Heading newDirection = WallHelpers.Headings.Where(x => x != direction).ElementAt(newNumber);
             CubeFaces[newDirection].travelDirection = true;
         }
