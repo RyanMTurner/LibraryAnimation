@@ -62,8 +62,8 @@ public class Cube
         GridPosition = position;
         WorldPosition = new Vector3(GridPosition.x * CubeGrid.UnitsEast, GridPosition.y * CubeGrid.UnitsUp, GridPosition.z * CubeGrid.UnitsNorth);
         if (last) {
-            int newNumber = Random.Range(0, 5);
-            Heading newDirection = WallHelpers.Headings.Where(x => x != direction).ElementAt(newNumber);
+            int newNumber = Random.Range(0, 4);
+            Heading newDirection = WallHelpers.Headings.Where(x => x != direction && x != direction.Opposite()).ElementAt(newNumber);
             CubeFaces[newDirection].travelDirection = true;
             Direction = newDirection;
         }
