@@ -118,6 +118,7 @@ public class CubeGrid {
         get => previousPositions.Count > 0 ? previousPositions?.Last() : null;
         set {
             if (previousPositions.Count > 1) {
+                /*
                 Cube lastCube = Cubes[(Vector3Int)previousPositions[0]];
                 List<Vector3Int> toRemove = new List<Vector3Int>();
                 foreach (var kvp in Cubes) {
@@ -126,9 +127,11 @@ public class CubeGrid {
                         kvp.Value.Destroy();
                     }
                 }
+                Debug.Log($"Cleaning up {toRemove.Count} cubes. There were {Cubes.Count}, so there will be {Cubes.Count - toRemove.Count}.");
                 foreach (var item in toRemove) {
                     Cubes.Remove(item);
                 }
+                */
                 previousPositions.RemoveAt(0);
             }
             previousPositions.Add((Vector3Int)value);
@@ -136,6 +139,7 @@ public class CubeGrid {
     }
     public Vector3Int? NextPosition = null;
     public Dictionary<Vector3Int, Cube> Cubes = new Dictionary<Vector3Int, Cube>();
+    public List<Cube> CubeList = new List<Cube>();
     public int CubeCounter { get; private set; }
 
     public static readonly float UnitsNorth = 14.2167f;
@@ -170,9 +174,17 @@ public class CubeGrid {
             Cube newCube = new Cube(spawnAt, i == length, direction, cap, CubeCounter, wallPrefabs);
             if (Cubes.ContainsKey(spawnAt)) {
                 Cubes[spawnAt].Destroy();
+                CubeList.Remove(Cubes[spawnAt]);
                 Cubes.Remove(spawnAt);
             }
             Cubes.Add(spawnAt, newCube);
+            CubeList.Add(newCube);
+            if (CubeList.Count > 100) {
+                var delete = CubeList[0];
+                CubeList.RemoveAt(0);
+                Cubes.Remove(delete.GridPosition);
+                delete.Destroy();
+            }
             CubeCounter++;
         }
         return spawnAt;
