@@ -1,9 +1,8 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraMover : MonoBehaviour
-{
+public class CameraMover : MonoBehaviour {
 
     [SerializeField] Heading currentHeading = Heading.North;
     [SerializeField] Heading currentFacing = Heading.North;
@@ -53,10 +52,22 @@ public class CameraMover : MonoBehaviour
                 if (grid.NextPosition != null) {
                     grid.PreviousPosition = grid.CurrentPosition;
                 }
-                grid.SetCurrentPosition(grid.Cubes[grid.NextPosition ?? new Vector3Int()]);
+                try {
+                    grid.SetCurrentPosition(grid.Cubes[grid.NextPosition ?? new Vector3Int()]);
+                }
+                catch (KeyNotFoundException ex) {
+                    Debug.LogError($"Unable to find key {grid.NextPosition}\n{ex.Message}");
+                    Debug.Break();
+                    return;
+                }
                 grid.SpawnCluster(minHallLength, maxHallLength, currentHeading, wallPrefabs);
                 if (grid.CurrentCube.Direction == currentFacing) {
-                    Debug.Log("Need to generate more");
+                    foreach (var kvp in grid.Cubes[(Vector3Int)grid.NextPosition].CubeFaces) {
+                        if (!kvp.Value.hasFace && kvp.Key.Opposite() != grid.CurrentCube.Direction) {
+                            int splitLength = UnityEngine.Random.Range(minHallLength, maxHallLength + 1);
+                            grid.SpawnHallway((Vector3Int)grid.NextPosition, splitLength, kvp.Key, true, wallPrefabs);
+                        }
+                    }
                 }
             }
         }
