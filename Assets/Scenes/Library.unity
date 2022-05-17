@@ -222,7 +222,7 @@ MonoBehaviour:
   currentHeading: 0
   minHallLength: 6
   maxHallLength: 6
-  cameraSpeed: 50
+  cameraSpeed: 40
   wallPrefabs:
   - {fileID: 1611948548659457444, guid: 24a42401b54401e42a793c186e7e74ed, type: 3}
   - {fileID: 1299325552036383499, guid: 259ed569fb1d25844837be519fd46425, type: 3}

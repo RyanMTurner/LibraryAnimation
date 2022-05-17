@@ -58,7 +58,7 @@ public class Cube
         { Heading.Down, new CubeFace() },
     };
 
-    public Cube(Vector3Int position, bool last, Heading direction, List<GameObject> wallPrefabs) {
+    public Cube(Vector3Int position, bool last, Heading direction, bool cap, List<GameObject> wallPrefabs) {
         GridPosition = position;
         WorldPosition = new Vector3(GridPosition.x * CubeGrid.UnitsEast, GridPosition.y * CubeGrid.UnitsUp, GridPosition.z * CubeGrid.UnitsNorth);
         if (last) {
@@ -72,10 +72,10 @@ public class Cube
             Direction = direction;
         }
         foreach (var kvp in CubeFaces) {
-            if (kvp.Value.travelDirection) { continue; }
-            if (kvp.Key == direction.Opposite()) { continue; }
+            if (!cap && kvp.Value.travelDirection) { continue; }
+            if (!cap && kvp.Key == direction.Opposite()) { continue; }
 
-            kvp.Value.hasFace = !last || Random.Range(0, 2) == 1;
+            kvp.Value.hasFace = cap || !last || Random.Range(0, 2) == 1;
             if (kvp.Value.hasFace) {
                 CameraMover.GlobalInstantiate(wallPrefabs.GetSide(kvp.Key), 
                         new Vector3(wallPrefabs.GetSide(kvp.Key).transform.position.x + CubeGrid.UnitsEast * position.x,
@@ -104,7 +104,7 @@ public class CubeGrid {
     public static readonly float UnitsUp = 10f;
 
     //Returns the position of the last spawned cube; e.g. to set CurrentPosition
-    public Vector3Int SpawnHallway(Vector3Int startingPos, int length, Heading direction, List<GameObject> wallPrefabs) {
+    public Vector3Int SpawnHallway(Vector3Int startingPos, int length, Heading direction, bool cap, List<GameObject> wallPrefabs) {
         Vector3Int spawnAt = new Vector3Int(startingPos.x, startingPos.y, startingPos.z);
         for (int i = 1; i <= length; i++) {
             spawnAt = new Vector3Int(startingPos.x, startingPos.y, startingPos.z);
@@ -128,7 +128,7 @@ public class CubeGrid {
                     spawnAt += new Vector3Int(0, -i, 0);
                     break;
             }
-            Cube newCube = new Cube(spawnAt, i == length, direction, wallPrefabs);
+            Cube newCube = new Cube(spawnAt, i == length, direction, cap, wallPrefabs);
             Cubes.Add(spawnAt, newCube);
         }
         return spawnAt;
@@ -136,11 +136,11 @@ public class CubeGrid {
 
     public void SpawnCluster(int minLength, int maxLength, Heading direction, List<GameObject> wallPrefabs) {
         int length = Random.Range(minLength, maxLength + 1);
-        SetCurrentPosition(Cubes[SpawnHallway(CurrentPosition, length, direction, wallPrefabs)]);
+        SetCurrentPosition(Cubes[SpawnHallway(CurrentPosition, length, direction, false, wallPrefabs)]);
         foreach (var kvp in Cubes[CurrentPosition].CubeFaces) {
             if (!kvp.Value.hasFace && kvp.Key.Opposite() != direction) {
                 int splitLength = Random.Range(minLength, maxLength + 1);
-                var newPosition = SpawnHallway(CurrentPosition, splitLength, kvp.Key, wallPrefabs);
+                var newPosition = SpawnHallway(CurrentPosition, splitLength, kvp.Key, !kvp.Value.travelDirection, wallPrefabs);
                 if (kvp.Value.travelDirection) {
                     NextPosition = newPosition;
                 }
