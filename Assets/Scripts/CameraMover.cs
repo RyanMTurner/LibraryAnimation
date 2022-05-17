@@ -49,6 +49,9 @@ public class CameraMover : MonoBehaviour
             if ((grid.CurrentCube.WorldPosition - transform.position).sqrMagnitude < 2) {
                 transform.position = grid.CurrentCube.WorldPosition;
                 currentHeading = grid.CurrentCube.Direction;
+                if (grid.NextPosition != null) {
+                    grid.PreviousPosition = grid.CurrentPosition;
+                }
                 grid.SetCurrentPosition(grid.Cubes[grid.NextPosition ?? new Vector3Int()]);
                 grid.SpawnCluster(minHallLength, maxHallLength, currentHeading, wallPrefabs);
             }

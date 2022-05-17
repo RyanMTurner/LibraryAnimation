@@ -103,6 +103,7 @@ public class CubeGrid {
         currentPosition = cube.GridPosition;
     }
 
+    public Vector3Int? PreviousPosition = null;
     public Vector3Int? NextPosition = null;
     public Dictionary<Vector3Int, Cube> Cubes = new Dictionary<Vector3Int, Cube>();
 
@@ -153,6 +154,7 @@ public class CubeGrid {
                 }
             }
         }
+        Debug.Log($"Prev: {PreviousPosition}\nCurr: {CurrentPosition}\nNext: {NextPosition}");
     }
 
 }
