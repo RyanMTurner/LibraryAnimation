@@ -29,9 +29,9 @@ public static class WallHelpers {
             case Heading.West:
                 return Heading.East;
             case Heading.Up:
-                return Heading.Up;
-            case Heading.Down:
                 return Heading.Down;
+            case Heading.Down:
+                return Heading.Up;
         }
     }
 
@@ -46,7 +46,8 @@ public class CubeFace {
 
 public class Cube
 {
-    public readonly Vector3Int Position;
+    public readonly Vector3Int GridPosition;
+    public readonly Vector3 WorldPosition;
     public readonly Heading Direction;
     public Dictionary<Heading, CubeFace> CubeFaces = new Dictionary<Heading, CubeFace>() {
         { Heading.North, new CubeFace() },
@@ -58,7 +59,8 @@ public class Cube
     };
 
     public Cube(Vector3Int position, bool last, Heading direction, List<GameObject> wallPrefabs) {
-        Position = position;
+        GridPosition = position;
+        WorldPosition = new Vector3(GridPosition.x * CubeGrid.UnitsEast, GridPosition.y * CubeGrid.UnitsUp, GridPosition.z * CubeGrid.UnitsNorth);
         if (last) {
             int newNumber = Random.Range(0, 5);
             Heading newDirection = WallHelpers.Headings.Where(x => x != direction).ElementAt(newNumber);
@@ -86,7 +88,14 @@ public class Cube
 }
 
 public class CubeGrid {
-    public Vector3Int CurrentPosition = new Vector3Int(0, 0, -1);
+    private Vector3Int currentPosition = new Vector3Int(0, 0, -1);
+    public Vector3Int CurrentPosition => currentPosition;
+    public Cube CurrentCube { get; private set; } = null;
+    private void SetCurrentPosition(Cube cube) {
+        CurrentCube = cube;
+        currentPosition = cube.GridPosition;
+    }
+
     public Vector3Int? NextPosition = null;
     public Dictionary<Vector3Int, Cube> Cubes = new Dictionary<Vector3Int, Cube>();
 
@@ -127,7 +136,7 @@ public class CubeGrid {
 
     public void SpawnCluster(int minLength, int maxLength, Heading direction, List<GameObject> wallPrefabs) {
         int length = Random.Range(minLength, maxLength + 1);
-        CurrentPosition = SpawnHallway(CurrentPosition, length, direction, wallPrefabs);
+        SetCurrentPosition(Cubes[SpawnHallway(CurrentPosition, length, direction, wallPrefabs)]);
         foreach (var kvp in Cubes[CurrentPosition].CubeFaces) {
             if (!kvp.Value.hasFace && kvp.Key.Opposite() != direction) {
                 int splitLength = Random.Range(minLength, maxLength + 1);
@@ -138,4 +147,5 @@ public class CubeGrid {
             }
         }
     }
+
 }

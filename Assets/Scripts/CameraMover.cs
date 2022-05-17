@@ -12,16 +12,21 @@ public class CameraMover : MonoBehaviour
     int gridX = 0;
     int gridY = 0;
 
+    bool moving = true;
+
     [SerializeField] List<GameObject> wallPrefabs;
 
     CubeGrid grid = new CubeGrid();
 
+    Vector3 initialPosition;
+
     private void Start() {
+        initialPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
         grid.SpawnCluster(minHallLength, maxHallLength, currentHeading, wallPrefabs);
     }
 
     private void Update() {
-        float move = cameraSpeed * Time.deltaTime;
+        float move = cameraSpeed * Time.deltaTime * (moving ? 1 : 0);
         switch (currentHeading) {
             case Heading.North:
                 transform.position += new Vector3(0, 0, move);
@@ -41,6 +46,13 @@ public class CameraMover : MonoBehaviour
             case Heading.Down:
                 transform.position += new Vector3(0, -move, 0);
                 break;
+        }
+
+        if (grid.CurrentCube != null) {
+            if ((grid.CurrentCube.WorldPosition - transform.position).sqrMagnitude < 2) {
+                Debug.Log("Close enough!");
+                moving = false;
+            }
         }
     }
 
