@@ -6,6 +6,7 @@ public class CameraMover : MonoBehaviour
 {
 
     [SerializeField] Heading currentHeading = Heading.North;
+    [SerializeField] Heading currentFacing = Heading.North;
     [SerializeField] int minHallLength = 6;
     [SerializeField] int maxHallLength = 6;
     [SerializeField] float cameraSpeed = 10;
