@@ -168,6 +168,10 @@ public class CubeGrid {
                     break;
             }
             Cube newCube = new Cube(spawnAt, i == length, direction, cap, CubeCounter, wallPrefabs);
+            if (Cubes.ContainsKey(spawnAt)) {
+                Cubes[spawnAt].Destroy();
+                Cubes.Remove(spawnAt);
+            }
             Cubes.Add(spawnAt, newCube);
             CubeCounter++;
         }
