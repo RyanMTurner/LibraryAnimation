@@ -49,6 +49,7 @@ public class Cube
     public readonly Vector3Int GridPosition;
     public readonly Vector3 WorldPosition;
     public readonly Heading Direction;
+    public readonly int Index;
     public Dictionary<Heading, CubeFace> CubeFaces = new Dictionary<Heading, CubeFace>() {
         { Heading.North, new CubeFace() },
         { Heading.South, new CubeFace() },
@@ -58,9 +59,10 @@ public class Cube
         { Heading.Down, new CubeFace() },
     };
 
-    public Cube(Vector3Int position, bool last, Heading direction, bool cap, List<GameObject> wallPrefabs) {
+    public Cube(Vector3Int position, bool last, Heading direction, bool cap, int index, List<GameObject> wallPrefabs) {
         GridPosition = position;
         WorldPosition = new Vector3(GridPosition.x * CubeGrid.UnitsEast, GridPosition.y * CubeGrid.UnitsUp, GridPosition.z * CubeGrid.UnitsNorth);
+        Index = index;
         if (last) {
             int newNumber = Random.Range(0, 4);
             Heading newDirection = WallHelpers.Headings.Where(x => x != direction && x != direction.Opposite()).ElementAt(newNumber);
@@ -84,11 +86,19 @@ public class Cube
                 }
             }
             if (kvp.Value.hasFace) {
-                CameraMover.GlobalInstantiate(wallPrefabs.GetSide(kvp.Key), 
+                kvp.Value.spawnedFace = CameraMover.GlobalInstantiate(wallPrefabs.GetSide(kvp.Key), 
                         new Vector3(wallPrefabs.GetSide(kvp.Key).transform.position.x + CubeGrid.UnitsEast * position.x,
                         wallPrefabs.GetSide(kvp.Key).transform.position.y + CubeGrid.UnitsUp * position.y,
                         wallPrefabs.GetSide(kvp.Key).transform.position.z + CubeGrid.UnitsNorth * position.z), 
                     wallPrefabs.GetSide(kvp.Key).transform.rotation);
+            }
+        }
+    }
+
+    public void Destroy() {
+        foreach (var kvp in CubeFaces) {
+            if (kvp.Value.hasFace) {
+                CameraMover.GlobalDestroy(kvp.Value.spawnedFace);
             }
         }
     }
@@ -108,13 +118,24 @@ public class CubeGrid {
         get => previousPosition;
         set {
             if (previousPosition != null) {
-
+                Cube lastCube = Cubes[(Vector3Int)previousPosition];
+                List<Vector3Int> toRemove = new List<Vector3Int>();
+                foreach (var kvp in Cubes) {
+                    if (kvp.Value.Index < lastCube.Index) {
+                        toRemove.Add(kvp.Key);
+                        kvp.Value.Destroy();
+                    }
+                }
+                foreach (var item in toRemove) {
+                    Cubes.Remove(item);
+                }
             }
             previousPosition = value;
         }
     }
     public Vector3Int? NextPosition = null;
     public Dictionary<Vector3Int, Cube> Cubes = new Dictionary<Vector3Int, Cube>();
+    public int CubeCounter { get; private set; }
 
     public static readonly float UnitsNorth = 14.2167f;
     public static readonly float UnitsEast = 10f;
@@ -145,8 +166,9 @@ public class CubeGrid {
                     spawnAt += new Vector3Int(0, -i, 0);
                     break;
             }
-            Cube newCube = new Cube(spawnAt, i == length, direction, cap, wallPrefabs);
+            Cube newCube = new Cube(spawnAt, i == length, direction, cap, CubeCounter, wallPrefabs);
             Cubes.Add(spawnAt, newCube);
+            CubeCounter++;
         }
         return spawnAt;
     }
