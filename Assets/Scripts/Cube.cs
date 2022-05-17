@@ -72,10 +72,17 @@ public class Cube
             Direction = direction;
         }
         foreach (var kvp in CubeFaces) {
-            if (kvp.Key == direction.Opposite()) { continue; }
-            if (kvp.Value.travelDirection) { continue; }
-
-            kvp.Value.hasFace = !last || (last && cap) || Random.Range(0, 2) == 1;
+            if (kvp.Key == direction.Opposite() || kvp.Value.travelDirection) {
+                kvp.Value.hasFace = last && cap;
+            }
+            else {
+                if (last) {
+                    kvp.Value.hasFace = cap || Random.Range(0, 2) == 1;
+                }
+                else {
+                    kvp.Value.hasFace = true;
+                }
+            }
             if (kvp.Value.hasFace) {
                 CameraMover.GlobalInstantiate(wallPrefabs.GetSide(kvp.Key), 
                         new Vector3(wallPrefabs.GetSide(kvp.Key).transform.position.x + CubeGrid.UnitsEast * position.x,
