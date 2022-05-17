@@ -153,7 +153,6 @@ public class CubeGrid {
                 }
             }
         }
-        Debug.Log($"Current Position: {CurrentPosition}\nNextPosition: {NextPosition}");
     }
 
 }
