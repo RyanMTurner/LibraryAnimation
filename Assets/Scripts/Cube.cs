@@ -143,7 +143,7 @@ public class CubeGrid {
 
     public void SpawnCluster(int minLength, int maxLength, Heading direction, List<GameObject> wallPrefabs) {
         int length = Random.Range(minLength, maxLength + 1);
-        SetCurrentPosition(Cubes[SpawnHallway(CurrentPosition, length, direction, false, wallPrefabs)]);
+        SetCurrentPosition(NextPosition == null ? Cubes[SpawnHallway(CurrentPosition, length, direction, false, wallPrefabs)] : Cubes[NextPosition ?? new Vector3Int()]);
         foreach (var kvp in Cubes[CurrentPosition].CubeFaces) {
             if (!kvp.Value.hasFace && kvp.Key.Opposite() != direction) {
                 int splitLength = Random.Range(minLength, maxLength + 1);
@@ -153,6 +153,7 @@ public class CubeGrid {
                 }
             }
         }
+        Debug.Log($"Current Position: {CurrentPosition}\nNextPosition: {NextPosition}");
     }
 
 }
