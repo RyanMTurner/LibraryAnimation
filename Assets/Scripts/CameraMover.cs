@@ -55,6 +55,9 @@ public class CameraMover : MonoBehaviour
                 }
                 grid.SetCurrentPosition(grid.Cubes[grid.NextPosition ?? new Vector3Int()]);
                 grid.SpawnCluster(minHallLength, maxHallLength, currentHeading, wallPrefabs);
+                if (grid.CurrentCube.Direction == currentFacing) {
+                    Debug.Log("Need to generate more");
+                }
             }
         }
     }
