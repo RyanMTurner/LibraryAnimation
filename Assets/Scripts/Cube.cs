@@ -47,6 +47,7 @@ public class CubeFace {
 public class Cube
 {
     public readonly Vector3Int Position;
+    public readonly Heading Direction;
     public Dictionary<Heading, CubeFace> CubeFaces = new Dictionary<Heading, CubeFace>() {
         { Heading.North, new CubeFace() },
         { Heading.South, new CubeFace() },
@@ -62,9 +63,11 @@ public class Cube
             int newNumber = Random.Range(0, 5);
             Heading newDirection = WallHelpers.Headings.Where(x => x != direction).ElementAt(newNumber);
             CubeFaces[newDirection].travelDirection = true;
+            Direction = newDirection;
         }
         else {
             CubeFaces[direction].travelDirection = true;
+            Direction = direction;
         }
         foreach (var kvp in CubeFaces) {
             if (kvp.Value.travelDirection) { continue; }
@@ -84,6 +87,7 @@ public class Cube
 
 public class CubeGrid {
     public Vector3Int CurrentPosition = new Vector3Int(0, 0, -1);
+    public Vector3Int? NextPosition = null;
     public Dictionary<Vector3Int, Cube> Cubes = new Dictionary<Vector3Int, Cube>();
 
     public static readonly float UnitsNorth = 14.2167f;
@@ -119,5 +123,19 @@ public class CubeGrid {
             Cubes.Add(spawnAt, newCube);
         }
         return spawnAt;
+    }
+
+    public void SpawnCluster(int minLength, int maxLength, Heading direction, List<GameObject> wallPrefabs) {
+        int length = Random.Range(minLength, maxLength + 1);
+        CurrentPosition = SpawnHallway(CurrentPosition, length, direction, wallPrefabs);
+        foreach (var kvp in Cubes[CurrentPosition].CubeFaces) {
+            if (!kvp.Value.hasFace && kvp.Key.Opposite() != direction) {
+                int splitLength = Random.Range(minLength, maxLength + 1);
+                var newPosition = SpawnHallway(CurrentPosition, splitLength, kvp.Key, wallPrefabs);
+                if (kvp.Value.travelDirection) {
+                    NextPosition = newPosition;
+                }
+            }
+        }
     }
 }

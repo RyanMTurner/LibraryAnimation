@@ -7,6 +7,7 @@ public class CameraMover : MonoBehaviour
 
     [SerializeField] Heading currentHeading = Heading.North;
     [SerializeField] int minHallLength = 6;
+    [SerializeField] int maxHallLength = 6;
     [SerializeField] float cameraSpeed = 10;
     int gridX = 0;
     int gridY = 0;
@@ -16,7 +17,7 @@ public class CameraMover : MonoBehaviour
     CubeGrid grid = new CubeGrid();
 
     private void Start() {
-        grid.SpawnHallway(grid.CurrentPosition, minHallLength + 1, currentHeading, wallPrefabs);
+        grid.SpawnCluster(minHallLength, maxHallLength, currentHeading, wallPrefabs);
     }
 
     private void Update() {
