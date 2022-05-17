@@ -62,4 +62,8 @@ public class CameraMover : MonoBehaviour
         return Instantiate(go, pos, rot);
     }
 
+    public static void GlobalDestroy(GameObject go) {
+        Destroy(go);
+    }
+
 }
