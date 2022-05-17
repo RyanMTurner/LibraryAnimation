@@ -113,30 +113,7 @@ public class CubeGrid {
         currentPosition = cube.GridPosition;
     }
 
-    private List<Vector3Int> previousPositions = new List<Vector3Int>();
-    public Vector3Int? PreviousPosition {
-        get => previousPositions.Count > 0 ? previousPositions?.Last() : null;
-        set {
-            if (previousPositions.Count > 1) {
-                /*
-                Cube lastCube = Cubes[(Vector3Int)previousPositions[0]];
-                List<Vector3Int> toRemove = new List<Vector3Int>();
-                foreach (var kvp in Cubes) {
-                    if (kvp.Value.Index < lastCube.Index) {
-                        toRemove.Add(kvp.Key);
-                        kvp.Value.Destroy();
-                    }
-                }
-                Debug.Log($"Cleaning up {toRemove.Count} cubes. There were {Cubes.Count}, so there will be {Cubes.Count - toRemove.Count}.");
-                foreach (var item in toRemove) {
-                    Cubes.Remove(item);
-                }
-                */
-                previousPositions.RemoveAt(0);
-            }
-            previousPositions.Add((Vector3Int)value);
-        }
-    }
+    public Vector3Int? PreviousPosition = null;
     public Vector3Int? NextPosition = null;
     public Dictionary<Vector3Int, Cube> Cubes = new Dictionary<Vector3Int, Cube>();
     public List<Cube> CubeList = new List<Cube>();
@@ -202,7 +179,7 @@ public class CubeGrid {
                 }
             }
         }
-        //Debug.Log($"Prev: {PreviousPosition}\nCurr: {CurrentPosition}\nNext: {NextPosition}");
+        Debug.Log($"Prev: {PreviousPosition}\nCurr: {CurrentPosition}\nNext: {NextPosition}");
     }
 
 }
