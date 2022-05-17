@@ -91,7 +91,7 @@ public class CubeGrid {
     private Vector3Int currentPosition = new Vector3Int(0, 0, -1);
     public Vector3Int CurrentPosition => currentPosition;
     public Cube CurrentCube { get; private set; } = null;
-    private void SetCurrentPosition(Cube cube) {
+    public void SetCurrentPosition(Cube cube) {
         CurrentCube = cube;
         currentPosition = cube.GridPosition;
     }

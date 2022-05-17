@@ -18,10 +18,7 @@ public class CameraMover : MonoBehaviour
 
     CubeGrid grid = new CubeGrid();
 
-    Vector3 initialPosition;
-
     private void Start() {
-        initialPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
         grid.SpawnCluster(minHallLength, maxHallLength, currentHeading, wallPrefabs);
     }
 
@@ -50,8 +47,10 @@ public class CameraMover : MonoBehaviour
 
         if (grid.CurrentCube != null) {
             if ((grid.CurrentCube.WorldPosition - transform.position).sqrMagnitude < 2) {
-                Debug.Log("Close enough!");
-                moving = false;
+                transform.position = grid.CurrentCube.WorldPosition;
+                currentHeading = grid.CurrentCube.Direction;
+                grid.SetCurrentPosition(grid.Cubes[grid.NextPosition ?? new Vector3Int()]);
+                grid.SpawnCluster(minHallLength, maxHallLength, currentHeading, wallPrefabs);
             }
         }
     }
