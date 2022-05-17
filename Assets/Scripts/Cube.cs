@@ -113,12 +113,12 @@ public class CubeGrid {
         currentPosition = cube.GridPosition;
     }
 
-    private Vector3Int? previousPosition;
+    private List<Vector3Int> previousPositions = new List<Vector3Int>();
     public Vector3Int? PreviousPosition {
-        get => previousPosition;
+        get => previousPositions.Count > 0 ? previousPositions?.Last() : null;
         set {
-            if (previousPosition != null) {
-                Cube lastCube = Cubes[(Vector3Int)previousPosition];
+            if (previousPositions.Count > 1) {
+                Cube lastCube = Cubes[(Vector3Int)previousPositions[0]];
                 List<Vector3Int> toRemove = new List<Vector3Int>();
                 foreach (var kvp in Cubes) {
                     if (kvp.Value.Index < lastCube.Index) {
@@ -129,8 +129,9 @@ public class CubeGrid {
                 foreach (var item in toRemove) {
                     Cubes.Remove(item);
                 }
+                previousPositions.RemoveAt(0);
             }
-            previousPosition = value;
+            previousPositions.Add((Vector3Int)value);
         }
     }
     public Vector3Int? NextPosition = null;
