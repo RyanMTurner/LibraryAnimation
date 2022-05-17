@@ -21,7 +21,27 @@ public class CameraMover : MonoBehaviour
     }
 
     private void Update() {
-        
+        float move = cameraSpeed * Time.deltaTime;
+        switch (currentHeading) {
+            case Heading.North:
+                transform.position += new Vector3(0, 0, move);
+                break;
+            case Heading.South:
+                transform.position += new Vector3(0, 0, -move);
+                break;
+            case Heading.East:
+                transform.position += new Vector3(move, 0, 0);
+                break;
+            case Heading.West:
+                transform.position += new Vector3(-move, 0, 0);
+                break;
+            case Heading.Up:
+                transform.position += new Vector3(0, move, 0);
+                break;
+            case Heading.Down:
+                transform.position += new Vector3(0, -move, 0);
+                break;
+        }
     }
 
     public static GameObject GlobalInstantiate(GameObject go, Vector3 pos, Quaternion rot) {
