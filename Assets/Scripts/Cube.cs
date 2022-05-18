@@ -49,7 +49,6 @@ public class Cube
     public readonly Vector3Int GridPosition;
     public readonly Vector3 WorldPosition;
     public readonly Heading Direction;
-    public readonly int Index;
     public Dictionary<Heading, CubeFace> CubeFaces = new Dictionary<Heading, CubeFace>() {
         { Heading.North, new CubeFace() },
         { Heading.South, new CubeFace() },
@@ -59,10 +58,9 @@ public class Cube
         { Heading.Down, new CubeFace() },
     };
 
-    public Cube(Vector3Int position, bool last, Heading direction, bool cap, int index, List<GameObject> wallPrefabs) {
+    public Cube(Vector3Int position, bool last, Heading direction, bool cap, List<GameObject> wallPrefabs) {
         GridPosition = position;
         WorldPosition = new Vector3(GridPosition.x * CubeGrid.UnitsEast, GridPosition.y * CubeGrid.UnitsUp, GridPosition.z * CubeGrid.UnitsNorth);
-        Index = index;
         if (last) {
             int newNumber = Random.Range(0, 4);
             Heading newDirection = WallHelpers.Headings.Where(x => x != direction && x != direction.Opposite()).ElementAt(newNumber);
@@ -117,7 +115,6 @@ public class CubeGrid {
     public Vector3Int? NextPosition = null;
     public Dictionary<Vector3Int, Cube> Cubes = new Dictionary<Vector3Int, Cube>();
     public List<Cube> CubeList = new List<Cube>();
-    public int CubeCounter { get; private set; }
 
     public static readonly float UnitsNorth = 14.2167f;
     public static readonly float UnitsEast = 10f;
@@ -148,7 +145,7 @@ public class CubeGrid {
                     spawnAt += new Vector3Int(0, -i, 0);
                     break;
             }
-            Cube newCube = new Cube(spawnAt, i == length, direction, cap, CubeCounter, wallPrefabs);
+            Cube newCube = new Cube(spawnAt, i == length, direction, cap, wallPrefabs);
             if (Cubes.ContainsKey(spawnAt)) {
                 Cubes[spawnAt].Destroy();
                 CubeList.Remove(Cubes[spawnAt]);
@@ -162,7 +159,6 @@ public class CubeGrid {
                 Cubes.Remove(delete.GridPosition);
                 delete.Destroy();
             }
-            CubeCounter++;
         }
         return spawnAt;
     }
@@ -179,7 +175,7 @@ public class CubeGrid {
                 }
             }
         }
-        Debug.Log($"Prev: {PreviousPosition}\nCurr: {CurrentPosition}\nNext: {NextPosition}");
+        //Debug.Log($"Prev: {PreviousPosition}\nCurr: {CurrentPosition}\nNext: {NextPosition}");
     }
 
 }
