@@ -61,29 +61,31 @@ public class Cube
     public Cube(Vector3Int position, bool last, Heading direction, bool cap, List<GameObject> wallPrefabs) {
         GridPosition = position;
         WorldPosition = new Vector3(GridPosition.x * CubeGrid.UnitsEast, GridPosition.y * CubeGrid.UnitsUp, GridPosition.z * CubeGrid.UnitsNorth);
-        if (last) {
+
+        if (last) { //If this is the last segment of a hallway, turn
             int newNumber = Random.Range(0, 4);
-            Heading newDirection = WallHelpers.Headings.Where(x => x != direction && x != direction.Opposite()).ElementAt(newNumber);
+            Heading newDirection = WallHelpers.Headings.Where(x => x != direction && x != direction.Opposite()).ElementAt(newNumber); //You must change direction and cannot 180
             CubeFaces[newDirection].travelDirection = true;
             Direction = newDirection;
         }
-        else {
+        else { //Otherwise, don't turn
             CubeFaces[direction].travelDirection = true;
             Direction = direction;
         }
+
         foreach (var kvp in CubeFaces) {
-            if (kvp.Key == direction.Opposite() || kvp.Value.travelDirection) {
+            if (kvp.Key == direction.Opposite() || kvp.Value.travelDirection) { //Only seal off the direction you're going or coming from if this is the last segment of a capped hallway
                 kvp.Value.hasFace = last && cap;
             }
             else {
-                if (last) {
+                if (last) { //If this is the last segment of a hallway, seal all its faces. If it's the last segment of an uncapped hallway, each face has a 50/50 to be sealed.
                     kvp.Value.hasFace = cap || Random.Range(0, 2) == 1;
                 }
-                else {
+                else { //If this is NOT the last segment of a hallway, seal all faces other than the direction you're going or coming from (see first if statement in foreach above).
                     kvp.Value.hasFace = true;
                 }
             }
-            if (kvp.Value.hasFace) {
+            if (kvp.Value.hasFace) { //Create the gameobject visual
                 kvp.Value.spawnedFace = CameraMover.GlobalInstantiate(wallPrefabs.GetSide(kvp.Key), 
                         new Vector3(wallPrefabs.GetSide(kvp.Key).transform.position.x + CubeGrid.UnitsEast * position.x,
                         wallPrefabs.GetSide(kvp.Key).transform.position.y + CubeGrid.UnitsUp * position.y,
@@ -104,15 +106,14 @@ public class Cube
 
 public class CubeGrid {
     private Vector3Int currentPosition = new Vector3Int(0, 0, -1);
-    public Vector3Int CurrentPosition => currentPosition;
+    public Vector3Int CurrentPosition => currentPosition; //The location to which the camera is currently moving
     public Cube CurrentCube { get; private set; } = null;
     public void SetCurrentPosition(Cube cube) {
         CurrentCube = cube;
         currentPosition = cube.GridPosition;
     }
 
-    public Vector3Int? PreviousPosition = null;
-    public Vector3Int? NextPosition = null;
+    public Vector3Int? NextPosition = null; //The location to which the camera should start moving once it reaches CurrentPosition
     public Dictionary<Vector3Int, Cube> Cubes = new Dictionary<Vector3Int, Cube>();
     public List<Cube> CubeList = new List<Cube>();
 
@@ -120,10 +121,11 @@ public class CubeGrid {
     public static readonly float UnitsEast = 10f;
     public static readonly float UnitsUp = 10f;
 
-    //Returns the position of the last spawned cube; e.g. to set CurrentPosition
+    //Returns the position of the last spawned cube; e.g. to set as the next target
     public Vector3Int SpawnHallway(Vector3Int startingPos, int length, Heading direction, bool cap, List<GameObject> wallPrefabs) {
         Vector3Int spawnAt = new Vector3Int(startingPos.x, startingPos.y, startingPos.z);
-        for (int i = 1; i <= length; i++) {
+
+        for (int i = 1; i <= length; i++) { //Start at one so we don't replace the cube already at startingPos
             spawnAt = new Vector3Int(startingPos.x, startingPos.y, startingPos.z);
             switch (direction) {
                 case Heading.North:
@@ -145,14 +147,21 @@ public class CubeGrid {
                     spawnAt += new Vector3Int(0, -i, 0);
                     break;
             }
+
             Cube newCube = new Cube(spawnAt, i == length, direction, cap, wallPrefabs);
+
+            //If we run into a previously generated cube, replace it
             if (Cubes.ContainsKey(spawnAt)) {
                 Cubes[spawnAt].Destroy();
                 CubeList.Remove(Cubes[spawnAt]);
                 Cubes.Remove(spawnAt);
             }
+
+            //Keep track of all spawned objects
             Cubes.Add(spawnAt, newCube);
             CubeList.Add(newCube);
+
+            //Cap at 100 spawned cubes
             if (CubeList.Count > 100) {
                 var delete = CubeList[0];
                 CubeList.RemoveAt(0);
@@ -165,17 +174,20 @@ public class CubeGrid {
 
     public void SpawnCluster(int minLength, int maxLength, Heading direction, List<GameObject> wallPrefabs) {
         int length = Random.Range(minLength, maxLength + 1);
+
+        //Target the next junction (creating the next junction if this is the first spawn, i.e. NextPosition is null)
         SetCurrentPosition(NextPosition == null ? Cubes[SpawnHallway(CurrentPosition, length, direction, false, wallPrefabs)] : Cubes[NextPosition ?? new Vector3Int()]);
+
+        //Create a hallway off of each open face of the next junction (which together imo form a "cluster")
         foreach (var kvp in Cubes[CurrentPosition].CubeFaces) {
             if (!kvp.Value.hasFace && kvp.Key.Opposite() != direction) {
                 int splitLength = Random.Range(minLength, maxLength + 1);
                 var newPosition = SpawnHallway(CurrentPosition, splitLength, kvp.Key, !kvp.Value.travelDirection, wallPrefabs);
-                if (kvp.Value.travelDirection) {
+                if (kvp.Value.travelDirection) { //Set the way you'll travel from the cluster (see Cube constructor for where this is generated)
                     NextPosition = newPosition;
                 }
             }
         }
-        //Debug.Log($"Prev: {PreviousPosition}\nCurr: {CurrentPosition}\nNext: {NextPosition}");
     }
 
 }

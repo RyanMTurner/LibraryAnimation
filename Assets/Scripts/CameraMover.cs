@@ -19,10 +19,12 @@ public class CameraMover : MonoBehaviour {
     CubeGrid grid = new CubeGrid();
 
     private void Start() {
+        //Always start with the same straightaway
         grid.SpawnCluster(minHallLength, maxHallLength, currentHeading, wallPrefabs);
     }
 
     private void Update() {
+        //Move in the direction you're heading
         float move = cameraSpeed * Time.deltaTime * (moving ? 1 : 0);
         switch (currentHeading) {
             case Heading.North:
@@ -45,23 +47,14 @@ public class CameraMover : MonoBehaviour {
                 break;
         }
 
+        //If you're close enough to the center of a junction, turn
         if (grid.CurrentCube != null) {
             if ((grid.CurrentCube.WorldPosition - transform.position).sqrMagnitude < 2) {
-                transform.position = grid.CurrentCube.WorldPosition;
-                currentHeading = grid.CurrentCube.Direction;
-                if (grid.NextPosition != null) {
-                    grid.PreviousPosition = grid.CurrentPosition;
-                }
-                try {
-                    grid.SetCurrentPosition(grid.Cubes[grid.NextPosition ?? new Vector3Int()]);
-                }
-                catch (KeyNotFoundException ex) {
-                    Debug.LogError($"Unable to find key {grid.NextPosition}\n{ex.Message}");
-                    Debug.Break();
-                    return;
-                }
-                grid.SpawnCluster(minHallLength, maxHallLength, currentHeading, wallPrefabs);
-                if (grid.CurrentCube.Direction == currentFacing) {
+                transform.position = grid.CurrentCube.WorldPosition; //We detect at "close enough"; this ensures exact centering
+                currentHeading = grid.CurrentCube.Direction; //Turn
+                grid.SetCurrentPosition(grid.Cubes[grid.NextPosition ?? new Vector3Int()]); //Target the next junction
+                grid.SpawnCluster(minHallLength, maxHallLength, currentHeading, wallPrefabs); //Create offshoots from the next junction
+                if (grid.CurrentCube.Direction == currentFacing) { //If you can see the next-next junction, create offshoots from THAT
                     foreach (var kvp in grid.Cubes[(Vector3Int)grid.NextPosition].CubeFaces) {
                         if (!kvp.Value.hasFace && kvp.Key.Opposite() != grid.CurrentCube.Direction) {
                             int splitLength = UnityEngine.Random.Range(minHallLength, maxHallLength + 1);
@@ -73,10 +66,12 @@ public class CameraMover : MonoBehaviour {
         }
     }
 
+    //Used to allow non-monobehaviors to instantiate prefabs
     public static GameObject GlobalInstantiate(GameObject go, Vector3 pos, Quaternion rot) {
         return Instantiate(go, pos, rot);
     }
 
+    //Used to allow non-monobehaviors to destroy gameobjects they've instantiated
     public static void GlobalDestroy(GameObject go) {
         Destroy(go);
     }
