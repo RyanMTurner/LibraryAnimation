@@ -13,6 +13,7 @@ public class PatchouliFloat : MonoBehaviour {
     void Start()
     {
         initialPosition = transform.localPosition;
+        maxHeightDiff = maxHeightDiff * (Screen.height / 589f);
     }
 
     void Update()
