@@ -118,6 +118,11 @@ public class CameraMover : MonoBehaviour {
                 }
                 rolledRotationChanceThisCube = false;
             }
+
+            //Respond to input
+            if (Input.GetKeyDown(KeyCode.Escape)) {
+                Application.Quit();
+            }
         }
     }
 
