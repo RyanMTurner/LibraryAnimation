@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CameraMover : MonoBehaviour {
 
+    [SerializeField] AudioSource audioSource;
     [SerializeField] Heading currentHeading = Heading.North;
     [SerializeField] Heading previousFacing = Heading.North;
     [SerializeField] DateTime? facingChanged = null;
@@ -122,6 +123,23 @@ public class CameraMover : MonoBehaviour {
             //Respond to input
             if (Input.GetKeyDown(KeyCode.Escape)) {
                 Application.Quit();
+            }
+            if (Input.GetKeyDown(KeyCode.Space)) {
+                if (audioSource.isPlaying) {
+                    audioSource.Pause();
+                }
+                else {
+                    audioSource.UnPause();
+                }
+            }
+            if (Input.GetKeyDown(KeyCode.M)) {
+                audioSource.mute = !audioSource.mute;
+            }
+            if (Input.GetKeyDown(KeyCode.Plus) || Input.GetKeyDown(KeyCode.KeypadPlus)) {
+                audioSource.volume = Math.Min(1, audioSource.volume + .1f);
+            }
+            if (Input.GetKeyDown(KeyCode.Minus) || Input.GetKeyDown(KeyCode.KeypadMinus)) {
+                audioSource.volume = Math.Max(0, audioSource.volume - .1f);
             }
         }
     }
