@@ -36,6 +36,13 @@ public static class WallHelpers {
     }
 
     public static List<Heading> Headings = new List<Heading>() { Heading.North, Heading.South, Heading.East, Heading.West, Heading.Up, Heading.Down };
+    public static Dictionary<Heading, Vector3> HeadingRotations = new Dictionary<Heading, Vector3>() {
+        { Heading.North, new Vector3(0, 0, 0) },
+        { Heading.South, new Vector3(0, 180, 0) },
+        { Heading.East, new Vector3(0, 90, 0) },
+        { Heading.West, new Vector3(0, -90, 0) },
+        { Heading.Up, new Vector3(-90, 0, 0) },
+        { Heading.Down, new Vector3(90, 0, 0) } };
 }
 
 public class CubeFace {
@@ -44,8 +51,7 @@ public class CubeFace {
     public GameObject spawnedFace;
 }
 
-public class Cube
-{
+public class Cube {
     public readonly Vector3Int GridPosition;
     public readonly Vector3 WorldPosition;
     public readonly Heading Direction;
@@ -86,10 +92,10 @@ public class Cube
                 }
             }
             if (kvp.Value.hasFace) { //Create the gameobject visual
-                kvp.Value.spawnedFace = CameraMover.GlobalInstantiate(wallPrefabs.GetSide(kvp.Key), 
+                kvp.Value.spawnedFace = CameraMover.GlobalInstantiate(wallPrefabs.GetSide(kvp.Key),
                         new Vector3(wallPrefabs.GetSide(kvp.Key).transform.position.x + CubeGrid.UnitsEast * position.x,
                         wallPrefabs.GetSide(kvp.Key).transform.position.y + CubeGrid.UnitsUp * position.y,
-                        wallPrefabs.GetSide(kvp.Key).transform.position.z + CubeGrid.UnitsNorth * position.z), 
+                        wallPrefabs.GetSide(kvp.Key).transform.position.z + CubeGrid.UnitsNorth * position.z),
                     wallPrefabs.GetSide(kvp.Key).transform.rotation);
             }
         }
