@@ -16,7 +16,8 @@ public class CameraMover : MonoBehaviour {
             currentFacing = value;
         }
     }
-    bool hasRotated = false;
+    bool rolledRotationChanceThisCube = false;
+    bool didRotateThisCube = false;
     [SerializeField] int minHallLength = 6;
     [SerializeField] int maxHallLength = 6;
     [SerializeField] float cameraSpeed = 10;
@@ -72,22 +73,31 @@ public class CameraMover : MonoBehaviour {
         if (grid.CurrentCube != null) {
             float closeToCurrent = (grid.CurrentCube.WorldPosition - transform.position).sqrMagnitude;
             //If you're close enough to the center of a junction at which you can rotate camera, see if you should do so
-            if (!hasRotated && closeToCurrent < 200) {
-                hasRotated = true;
+            if (!rolledRotationChanceThisCube && closeToCurrent < 200) {
+                rolledRotationChanceThisCube = true;
                 if (CurrentFacing == Heading.North) { //If facing forward, maybe face up/down for vertical sections
                     if (grid.CurrentCube.Direction == Heading.Up || grid.CurrentCube.Direction == Heading.Down) {
                         int newFacing = UnityEngine.Random.Range(0, 3);
                         switch (newFacing) {
+                            default:
+                                didRotateThisCube = false;
+                                break;
                             case 1:
                                 CurrentFacing = Heading.Up;
+                                didRotateThisCube = true;
                                 break;
                             case 2:
                                 CurrentFacing = Heading.Down;
+                                didRotateThisCube = true;
                                 break;
                         }
                     }
+                    else {
+                        didRotateThisCube = false;
+                    }
                 }
                 else { //When coming out of a vertical section, face forward
+                    didRotateThisCube = CurrentFacing != Heading.North;
                     CurrentFacing = Heading.North;
                 }
             }
@@ -98,7 +108,7 @@ public class CameraMover : MonoBehaviour {
                 currentHeading = grid.CurrentCube.Direction; //Turn
                 grid.SetCurrentPosition(grid.Cubes[grid.NextPosition ?? new Vector3Int()]); //Target the next junction
                 grid.SpawnCluster(minHallLength, maxHallLength, currentHeading, wallPrefabs); //Create offshoots from the next junction
-                if (grid.CurrentCube.Direction == CurrentFacing) { //If you can see the next-next junction, create offshoots from THAT
+                if (grid.CurrentCube.Direction == CurrentFacing || didRotateThisCube) { //If you can see the next-next junction, create offshoots from THAT
                     foreach (var kvp in grid.Cubes[(Vector3Int)grid.NextPosition].CubeFaces) {
                         if (!kvp.Value.hasFace && kvp.Key.Opposite() != grid.CurrentCube.Direction) {
                             int splitLength = UnityEngine.Random.Range(minHallLength, maxHallLength + 1);
@@ -106,7 +116,7 @@ public class CameraMover : MonoBehaviour {
                         }
                     }
                 }
-                hasRotated = false;
+                rolledRotationChanceThisCube = false;
             }
         }
     }
