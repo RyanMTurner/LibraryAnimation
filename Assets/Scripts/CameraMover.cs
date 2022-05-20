@@ -5,10 +5,11 @@ using UnityEngine;
 public class CameraMover : MonoBehaviour {
 
     [SerializeField] AudioSource audioSource;
-    [SerializeField] Heading currentHeading = Heading.North;
-    [SerializeField] Heading previousFacing = Heading.North;
-    [SerializeField] DateTime? facingChanged = null;
-    [SerializeField] Heading currentFacing = Heading.North;
+    [SerializeField] GameObject patchouli;
+    Heading currentHeading = Heading.North;
+    Heading previousFacing = Heading.North;
+    DateTime? facingChanged = null;
+    Heading currentFacing = Heading.North;
     Heading CurrentFacing {
         get => currentFacing;
         set {
@@ -140,6 +141,9 @@ public class CameraMover : MonoBehaviour {
             }
             if (Input.GetKeyDown(KeyCode.Minus) || Input.GetKeyDown(KeyCode.KeypadMinus)) {
                 audioSource.volume = Math.Max(0, audioSource.volume - .1f);
+            }
+            if (Input.GetKeyDown(KeyCode.P)) {
+                patchouli.SetActive(!patchouli.activeInHierarchy);
             }
         }
     }
