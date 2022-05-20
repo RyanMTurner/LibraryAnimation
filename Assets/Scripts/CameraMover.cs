@@ -142,7 +142,7 @@ public class CameraMover : MonoBehaviour {
             if (Input.GetKeyDown(KeyCode.Minus) || Input.GetKeyDown(KeyCode.KeypadMinus)) {
                 audioSource.volume = Math.Max(0, audioSource.volume - .1f);
             }
-            if (Input.GetKeyDown(KeyCode.P)) {
+            if (Input.GetKeyDown(KeyCode.P) || Input.touchCount > 0) {
                 patchouli.SetActive(!patchouli.activeInHierarchy);
             }
         }
